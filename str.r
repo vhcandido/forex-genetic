@@ -1,7 +1,9 @@
 #required libraries
 library(zoo)
-library(quantmod)
+library(xts)
+library(TTR)
 library(chron)
+library(quantmod)
 
 source('code.r')
 
