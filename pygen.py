@@ -89,20 +89,20 @@ class Chromosome(Rule):
         pass
 
     def crossover(self, mate):
-           p1 = self.get_dict()
-           p2 = mate.get_dict()
-           cross = randint(1, 4)
-           # b1 s1 b2 s2 (original)
-           if cross == 1:
-               # s2 s1 b2 b1
-               p1['buy'], p2['sell'] = p2['sell'], p1['buy']
-           elif cross == 2:
-                # b1 b2 s1 s2
-               p1['sell'], p2['buy'] = p2['buy'], p1['sell']
-           elif cross == 3:
-               p1['buy']['rule1'], p2['sell']['rule1'] = p2['sell']['rule1'], p1['buy']['rule1']
-           elif cross == 4:
-               p1['buy']['rule2'], p2['sell']['rule2'] = p2['sell']['rule2'], p1['buy']['rule2']
+        p1 = self.get_dict()
+        p2 = mate.get_dict()
+        cross = randint(1, 4)
+        # b1 s1 b2 s2 (original)
+        if cross == 1:
+            # s2 s1 b2 b1
+            p1['buy'], p2['sell'] = p2['sell'], p1['buy']
+        elif cross == 2:
+             # b1 b2 s1 s2
+            p1['sell'], p2['buy'] = p2['buy'], p1['sell']
+        elif cross == 3:
+            p1['buy']['rule1'], p2['sell']['rule1'] = p2['sell']['rule1'], p1['buy']['rule1']
+        elif cross == 4:
+            p1['buy']['rule2'], p2['sell']['rule2'] = p2['sell']['rule2'], p1['buy']['rule2']
         return [ Chromosome(p1), Chromosome(p2) ]
 
 class Population(object):
