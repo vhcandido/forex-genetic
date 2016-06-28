@@ -158,7 +158,7 @@ class Population(object):
             curr = randrange(self._size)
             if self._fitness[curr] > self._fitness[best]:
                 best = curr
-        return self._population(best)
+        return self._population[best]
 
     def select_parents(self):
         return self.tournament_selection(), self.tournament_selection()
@@ -172,7 +172,7 @@ class Population(object):
         for ch in self._population:
             msg = ch.__str__() + '\n'
             s.send( msg.encode() )
-            fitness = s.recv(5000)
+            fitness = float(s.recv(5000))
             print fitness
             buf.append(fitness)
         s.close()
@@ -181,7 +181,9 @@ class Population(object):
         # Sort itself
         self.sort()
         # Flag to check if there was improvement
-        self.improved = buf[0] >  prev_best
+        self.improved = self._fitness[0] >  prev_best
+        if self._debug:
+            print 'Best:', self._fitness[0]
 
     def sort(self):
         df = DataFrame({'chromo': self._population,
@@ -240,19 +242,14 @@ def main():
     max_not_improved = 10
 
     # Creating initial population
-    pop = Population( size = 100,
-            crossover = 0.6,
-            mutation = 0.01,
-            elitism = 0.01,
-            imigration = 0.3,
-            tournament_size = 50,
-            debug = False)
+    pop = Population( size = 10,
+            crossover = 0.3,
+            mutation = 0.05,
+            elitism = 0.6,
+            imigration = 0.2,
+            tournament_size = 4,
+            debug = True)
 
-
-    print pop._population[0]
-    pop._population[0] = pop._population[0].mutate()
-    print pop._population[0]
-    pdb.set_trace()
     # Generations without improvements
     no_improvements = 0
     for i in range(max_generations):
@@ -261,8 +258,9 @@ def main():
         print 'Calculating fitness'
         pop.evaluate()
 
-        if pop.improved:
+        if not pop.improved:
             no_improvements += 1
+            print "Didn't improve:", no_improvements
         else:
             no_improvements = 0
 
