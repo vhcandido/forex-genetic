@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import socket
+import pdb
 
 from pandas import DataFrame
 from random import choice, random, randint, randrange
@@ -49,7 +50,7 @@ class Rule(object):
         d['sell']['rule2'] = Rule.generic_rule()
         d['sell']['operator'] = choice(['and', 'or'])
 
-        return Rule(d)
+        return d
 
     @staticmethod
     def generic_rule(ob=''):
@@ -60,14 +61,15 @@ class Rule(object):
             r.append('ema')
             r.append(randint(3, 80)) # slow EMA
             r.append(randint(3, 150)) # fast EMA
-            r.append(choice(['up','down'])) # trigger when crossing
         else:
             ob = choice(ta)
             r.append(ob)
             r.append(randint(3, 100))
-            #r.append(random())
             r.append(randint(0,100))
-            r.append(choice(['>','<']))
+        # For EMAs:
+        #   '>' means cross up
+        #   '<' meand cross down
+        r.append(choice(['>','<']))
 
         return r
 
@@ -85,8 +87,35 @@ class Rule(object):
         return d
 
 class Chromosome(Rule):
+    def __init__(self, d):
+        super(Chromosome, self).__init__(d)
+
     def mutate(self):
-        pass
+        ch = self.get_dict()
+        rule = choice(['buy', 'sell'])
+
+        # Equal chances for all genes
+        param = choice(['rule1', 'rule1', 'rule1',
+                        'rule2', 'rule2', 'rule2',
+                        'operator'])
+
+        if param == 'operator':
+            # Switch the logical operator
+            old = ch[rule][param]
+            ch[rule][param] = ('and' if old == 'or' else 'or')
+        else:
+            v = randint(1,3)
+            old = ch[rule][param][v]
+            if v == 3:
+                # Switch the relational operator
+                ch[rule][param][v] = ('<' if old == '>' else '>')
+            else:
+                # move 15% up or down
+                new = 0.15*old * (1 if random()<0.5 else -1)
+                ch[rule][param][v] += int(round(new))
+
+
+        return Chromosome(ch)
 
     def crossover(self, mate):
         p1 = self.get_dict()
@@ -120,7 +149,7 @@ class Population(object):
         self._fitness = [0.0] * size
         self._population = list()
         for i in range(size):
-            self._population.append(Chromosome.gen_random())
+            self._population.append(Chromosome(Rule.gen_random()))
 
     def tournament_selection(self):
         # Returns the tournament winner
@@ -129,7 +158,7 @@ class Population(object):
             curr = randrange(self._size)
             if self._fitness[curr] > self._fitness[best]:
                 best = curr
-        return best
+        return self._population(best)
 
     def select_parents(self):
         return self.tournament_selection(), self.tournament_selection()
@@ -172,7 +201,7 @@ class Population(object):
         # Create random individuals according to imigration rate
         idx = int(round(self._size * self._imigration))
         for i in range(idx):
-            buf.append(Chromosome.gen_random())
+            buf.append(Chromosome(Rule.gen_random()))
         buff.extend([0.0] * idx)
 
         # Fill the remaining positions with possible new* chromosomes
@@ -189,9 +218,8 @@ class Population(object):
 
             # Mutate according to mutation rate
             for ch in childs:
-                if random() <= self._mutation:
-                    ch, i = ch.mutate()
-                    if self._debug: print 'Mutation @ ', str(i)
+                if random() < self._mutation:
+                    ch = ch.mutate()
                 buf.append(ch)
             idx +=2
             buff.extend([0.0, 0.0])
@@ -220,6 +248,11 @@ def main():
             tournament_size = 50,
             debug = False)
 
+
+    print pop._population[0]
+    pop._population[0] = pop._population[0].mutate()
+    print pop._population[0]
+    pdb.set_trace()
     # Generations without improvements
     no_improvements = 0
     for i in range(max_generations):

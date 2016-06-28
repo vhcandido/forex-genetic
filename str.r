@@ -58,7 +58,7 @@ while(TRUE) {
 			ema1 <- EMA(prices, r1_num[1])
 			ema2 <- EMA(prices, r1_num[2])
 
-			if(r1_str[2] == 'up') {
+			if(r1_str[2] == '>') {
 				rule1 <- iif(cross.up(ema1, ema2), 1, NA)
 			}
 			else {
