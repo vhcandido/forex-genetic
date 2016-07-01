@@ -3,29 +3,42 @@
 import socket
 import pdb
 
+import matplotlib.pyplot as plt
+
 from pandas import DataFrame
 from random import choice, random, randint, randrange
 
 class Rule(object):
-    def __init__(self, d):
+    def __init__(self, d, is_list=False):
     #    self.rule = dict()
     #    self.rule = {
     #            'buy':
     #                {'rule1': list(),
     #                'rule2': list(),
-    #                'operator': 0},
+    #                'log_op': 0},
     #            'sell':
     #                {'rule1': list(),
     #                'rule2': list(),
-    #                'operator': 0}
+    #                'log_op': 0}
     #                }
-        self.buy_r1 = d['buy']['rule1']
-        self.buy_r2 = d['buy']['rule2']
-        self.buy_op = d['buy']['operator']
+        if not is_list:
+            self.buy_r1 = d['buy']['rule1']
+            self.buy_r2 = d['buy']['rule2']
+            self.buy_op = d['buy']['log_op']
 
-        self.sell_r1 = d['sell']['rule1']
-        self.sell_r2 = d['sell']['rule2']
-        self.sell_op = d['sell']['operator']
+            self.sell_r1 = d['sell']['rule1']
+            self.sell_r2 = d['sell']['rule2']
+            self.sell_op = d['sell']['log_op']
+        else:
+            self.buy_r1 = d[:4]
+            self.buy_r2 = d[4:8]
+            self.buy_op = d[8]
+
+            self.sell_r1 = d[9:13]
+            self.sell_r2 = d[13:17]
+            self.sell_op = d[17]
+
+
 
     def __str__(self):
         br1 = ','.join(str(i) for i in self.buy_r1)
@@ -44,11 +57,11 @@ class Rule(object):
 
         d['buy']['rule1'] = Rule.generic_rule('ema')
         d['buy']['rule2'] = Rule.generic_rule()
-        d['buy']['operator'] = choice(['and', 'or'])
+        d['buy']['log_op'] = choice(['and', 'or'])
 
         d['sell']['rule1'] = Rule.generic_rule('ema')
         d['sell']['rule2'] = Rule.generic_rule()
-        d['sell']['operator'] = choice(['and', 'or'])
+        d['sell']['log_op'] = choice(['and', 'or'])
 
         return d
 
@@ -65,7 +78,7 @@ class Rule(object):
             ob = choice(ta)
             r.append(ob)
             r.append(randint(3, 100))
-            r.append(randint(0,100))
+            r.append(random())
         # For EMAs:
         #   '>' means cross up
         #   '<' meand cross down
@@ -79,60 +92,99 @@ class Rule(object):
         d['sell'] = dict()
         d['buy']['rule1'] = self.buy_r1
         d['buy']['rule2'] = self.buy_r2
-        d['buy']['operator'] = self.buy_op
+        d['buy']['log_op'] = self.buy_op
 
         d['sell']['rule1'] = self.sell_r1
         d['sell']['rule2'] = self.sell_r2
-        d['sell']['operator'] = self.sell_op
+        d['sell']['log_op'] = self.sell_op
         return d
 
+    def get_list(self):
+        l = list()
+        l.extend(self.buy_r1)
+        l.extend(self.buy_r2)
+        l.append(self.buy_op)
+
+        l.extend(self.sell_r1)
+        l.extend(self.sell_r2)
+        l.append(self.sell_op)
+        return l
+
 class Chromosome(Rule):
-    def __init__(self, d):
-        super(Chromosome, self).__init__(d)
+    def __init__(self, d, is_list=False):
+        super(Chromosome, self).__init__(d=d, is_list=is_list)
 
     def mutate(self):
         ch = self.get_dict()
+
         rule = choice(['buy', 'sell'])
 
-        # Equal chances for all genes
-        param = choice(['rule1', 'rule1', 'rule1',
-                        'rule2', 'rule2', 'rule2',
-                        'operator'])
+        # New parameters
+        new = Rule.gen_random()
 
-        if param == 'operator':
-            # Switch the logical operator
-            old = ch[rule][param]
-            ch[rule][param] = ('and' if old == 'or' else 'or')
-        else:
-            v = randint(1,3)
-            old = ch[rule][param][v]
-            if v == 3:
-                # Switch the relational operator
-                ch[rule][param][v] = ('<' if old == '>' else '>')
+        # Choose mutation
+        mut = randrange(2)
+        # 0 - generate new rule
+        # 1 - new parameters
+        #   '-> logical operator - flip
+        #   '-> relational operator - flip
+        #   '-> technical indicator*
+        #   '-> numerical parameters*
+        # *: taken from new rule
+        if mut == 0: # generate new rule
+            ch[rule] = new[rule]
+        elif mut == 1: # new parameters
+            # Equal chances for all 9 genes
+            param = choice(['rule1']*4 + ['rule2']*4 + ['log_op'])
+            if param == 'log_op':
+                # Switch the logical operator
+                old = ch[rule][param]
+                ch[rule][param] = ('and' if old == 'or' else 'or')
             else:
-                # move 15% up or down
-                new = 0.15*old * (1 if random()<0.5 else -1)
-                ch[rule][param][v] += int(round(new))
+                # Choose 1 of 4 params
+                v = randrange(4)
+                old = ch[rule][param][v]
+                if v == 3:
+                    # Switch the relational operator
+                    ch[rule][param][v] = ('<' if old == '>' else '>')
+                else:
+                    ch[rule][param][v] = new[rule][param][v]
 
-
-        return Chromosome(ch)
+        return Chromosome(ch), mut
 
     def crossover(self, mate):
-        p1 = self.get_dict()
-        p2 = mate.get_dict()
-        cross = randint(1, 4)
-        # b1 s1 b2 s2 (original)
-        if cross == 1:
-            # s2 s1 b2 b1
-            p1['buy'], p2['sell'] = p2['sell'], p1['buy']
+        ch1 = self.get_list()
+        ch2 = mate.get_list()
+
+        cross = randrange(3)
+        # 0 - one point
+        # 1 - two point
+        # 2 - linear combination (numerical) or choice (string)
+        if cross == 0:
+            p = randint(1, len(ch1)-1)
+            ch1[p:], ch2[p:] = ch2[p:], ch1[p:]
+        elif cross == 1:
+            p1 = randrange(len(ch1))
+            p2 = randrange(len(ch1))
+            p1, p2 = min(p1,p2), max(p1,p2) # order to get list interval
+            ch1[p1:p2], ch2[p1:p2] = ch2[p1:p2], ch1[p1:p2]
         elif cross == 2:
-             # b1 b2 s1 s2
-            p1['sell'], p2['buy'] = p2['buy'], p1['sell']
-        elif cross == 3:
-            p1['buy']['rule1'], p2['sell']['rule1'] = p2['sell']['rule1'], p1['buy']['rule1']
-        elif cross == 4:
-            p1['buy']['rule2'], p2['sell']['rule2'] = p2['sell']['rule2'], p1['buy']['rule2']
-        return [ Chromosome(p1), Chromosome(p2) ]
+            for i in range(len(ch1)):
+                if type(ch1[i]) is str: # apply to string
+                    c = [ch1[i], ch2[i]]
+                    ch1[i], ch2[i] = choice(c), choice(c)
+                else: # apply to numerical
+                    if type(ch1[i]) is int:
+                        # Round to integer later
+                        flag = True
+                    a = random()
+                    ch1[i], ch2[i] = a*ch1[i] + (1-a)*ch2[i],\
+                                    a*ch2[i] + (1-a)*ch1[i]
+                    if flag:
+                        ch1[i] = int(round(ch1[i]))
+                        ch2[i] = int(round(ch2[i]))
+
+        return ([ Chromosome(ch1, True), Chromosome(ch2, True) ], cross)
 
 class Population(object):
     def __init__(self, size=1500, crossover=0.6, elitism=0.01, mutation=0.01,
@@ -146,6 +198,8 @@ class Population(object):
         self._debug = debug
         self.improved = False
 
+        self.best = list()
+        self.iteration = 0
         self._fitness = [0.0] * size
         self._population = list()
         for i in range(size):
@@ -185,6 +239,9 @@ class Population(object):
         if self._debug:
             print 'Best:', self._fitness[0]
 
+        self.best.append(prev_best)
+        self.iteration += 1
+
     def sort(self):
         df = DataFrame({'chromo': self._population,
                         'fitness': self._fitness})
@@ -199,29 +256,44 @@ class Population(object):
         idx = int(round(self._size * self._elitism))
         buf = self._population[:idx]
         buff = self._fitness[:idx]
+        if self._debug:
+            print "\nElitism"
+            print '\n'.join(i.__str__() for i in buf)
+            print '==============================='
 
         # Create random individuals according to imigration rate
         idx = int(round(self._size * self._imigration))
         for i in range(idx):
             buf.append(Chromosome(Rule.gen_random()))
         buff.extend([0.0] * idx)
+        if self._debug:
+            print "\nImigration"
+            print '\n'.join(i.__str__() for i in buf[-idx:])
+            print '==============================='
 
         # Fill the remaining positions with possible new* chromosomes
         #   *new -> according to crossover and mutation rates
         idx = len(buf)
         while(idx < self._size):
             parent1, parent2 = self.select_parents()
+            if self._debug:
+                print '\nSelected ==============================='
+                print parent1.__str__()
+                print parent2.__str__()
+                print '==============================='
 
             # Perform crossover according to crossover rate
             if random() < self._crossover:
-                childs = parent1.crossover(parent2)
+                childs, x_type = parent1.crossover(parent2)
+                if self._debug: print 'Crossover @ ', x_type
             else:
                 childs = [parent1, parent2]
 
             # Mutate according to mutation rate
             for ch in childs:
                 if random() < self._mutation:
-                    ch = ch.mutate()
+                    ch, m_type = ch.mutate()
+                    if self._debug: print 'Mutation @ ', str(m_type)
                 buf.append(ch)
             idx +=2
             buff.extend([0.0, 0.0])
@@ -236,19 +308,24 @@ class Population(object):
         print self._population[0]
         print 'Fitness: %f' % (self._fitness[0])
 
+    def plot_evolution(self):
+        x = range(self.iteration)
+        plt.step(x, self.best)
+        plt.savefig('fitness_evolution.png')
+
 
 def main():
     max_generations = 100
     max_not_improved = 10
 
     # Creating initial population
-    pop = Population( size = 10,
-            crossover = 0.3,
+    pop = Population( size = 100,
+            crossover = 0.4,
             mutation = 0.05,
-            elitism = 0.6,
-            imigration = 0.2,
-            tournament_size = 4,
-            debug = True)
+            elitism = 0.05,
+            imigration = 0.3,
+            tournament_size = 10,
+            debug = False)
 
     # Generations without improvements
     no_improvements = 0
@@ -257,6 +334,7 @@ def main():
 
         print 'Calculating fitness'
         pop.evaluate()
+        pop.plot_evolution()
 
         if not pop.improved:
             no_improvements += 1

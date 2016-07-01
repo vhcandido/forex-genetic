@@ -67,16 +67,16 @@ while(TRUE) {
 
 			if(r2_str[1] == 'rsi') {
 				tech = RSI(prices, n = r2_num[1])
-				param <- r2_num[2]
+				param <- r2_num[2]*100
 			}
 			else if(r2_str[1] == 'roc') {
 				tech = ROC(prices, n = r2_num[1]-2)
-				param <- r2_num[2]/100
+				param <- r2_num[2]
 			}
 			else if(r2_str[1] == 'macd') {
 				ma = MACD(prices, nSig = r2_num[1])
 				tech <- ma$macd - ma$signal
-				param <- r2_num[2]/100-0.5
+				param <- r2_num[2]*10-5
 			}
 
 			if(r2_str[2] == '>') {
