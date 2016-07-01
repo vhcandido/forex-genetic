@@ -3,14 +3,14 @@ trading rules based on Technical Analysis.
 
 
 To run this program you should have some R packages installed:
--quantmod
--TTR
--zoo
--xts
+* quantmod
+* TTR
+* zoo
+* xts
 
 Also some Python 2.7 libraries
--pandas
--matplotlib
+* pandas
+* matplotlib
 
 And the name of the file holding the financial data must be put in the strategy.r file.
 
