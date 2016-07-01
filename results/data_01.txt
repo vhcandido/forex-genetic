@@ -1,0 +1,20 @@
+ [1] "ema" "34"  "75"  ">"   "roc" "71"  "1"   ">"   "or"  "ema" "73"  "29" 
+[13] ">"   "roc" "37"  "1"   "<"   "and"
+Latest weights :
+                    GBPJPY
+2015-10-30 23:00:00 -95.83
+
+Performance summary :
+	CAGR	Best	Worst	
+	12.5	3.4	-2	
+
+[1] 0.2006332
+
+pop = Population( size = 100,
+    crossover = 0.4,
+    mutation = 0.05,
+    elitism = 0.1,
+    imigration = 0.2,
+    tournament_size = 10,
+
+OBS: Convergiu rapidamente. A solução ótima era levada adiante pela taxa de elitismo.

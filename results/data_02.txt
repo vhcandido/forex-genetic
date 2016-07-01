@@ -1,0 +1,21 @@
+ [1] "ema" "69"  "126" ">"   "roc" "35"  "0"   ">"   "and" "ema" "70"  "122"
+[13] "<"   "roc" "13"  "0"   "<"   "and"
+Latest weights :
+                    GBPJPY
+2015-10-30 23:00:00 -96.65
+
+Performance summary :
+	CAGR	Best	Worst	
+	12.4	3.2	-1.5	
+
+[1] 0.2246109
+
+ema,69,126,>,roc,35,0,>,and,ema,70,122,<,roc,13,0,<,and
+
+pop = Population( size = 100,
+    crossover = 0.4,
+    mutation = 0.05,
+    elitism = 0.05,
+    imigration = 0.3,
+    tournament_size = 10,
+
