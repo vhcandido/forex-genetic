@@ -5,7 +5,7 @@ library(TTR)
 library(chron)
 library(quantmod)
 
-source('code.r')
+source('SIT.r')
 
 quotes <- new.env()
 
