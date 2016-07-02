@@ -8,7 +8,7 @@
 # | trading rules based on Technical Analysis.                                |
 # +===========================================================================+
 
-from pygen import Population
+from genetic import Population
 
 def main():
     max_generations = 100
