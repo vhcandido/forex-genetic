@@ -1,8 +1,8 @@
-# Genetic Algorithm for optimization of Forex trading rules based on Technical Analysis
+# Genetic Algorithm for optimization of trading rules
 ----------
 This is a simple Genetic Algorithm developed to optimize parameters of trading rules based on Technical Analysis.
 
-It's buit using the R package Systematic Investor Tookit available here: [SIT][1]. Many thanks to Michael Kapler.
+It's built using the R package Systematic Investor Tookit available here: [SIT][1]. Many thanks to Michael Kapler.
 
 **Dependencies**
 
