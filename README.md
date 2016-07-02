@@ -1,5 +1,4 @@
 # Forex Genetic Algorithm
-----------
 ## Genetic Algorithm for optimization of trading rules
 
 This is a simple Genetic Algorithm developed to optimize parameters of trading rules based on Technical Analysis.
