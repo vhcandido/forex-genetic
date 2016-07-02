@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 # +===========================================================================+
-# | @author Victor Hugo Cândido de Oliveira                                   |
+# | @author Victor Hugo Candido de Oliveira                                   |
 # | 2016                                                                      |
 # |                                                                           |
 # | This is a simple Genetic Algorithm developed to optimize parameters of    |
