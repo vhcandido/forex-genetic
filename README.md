@@ -25,3 +25,9 @@ There will be an image with the evolution of the fitness function (Sharpe ratio,
 
 Using the generated rule string (separated by commas) run the strategy test to see the metrics computed over it.
 > Rscript test_strategy '<strategy_string>'
+
+
+#################################################
+The tookit used for running strategies can be found here:
+https://github.com/systematicinvestor/SIT
+Many thanks to Michael Kapler.
