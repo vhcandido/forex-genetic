@@ -30,4 +30,8 @@ Using the generated rule string (separated by commas) run the strategy test to s
 #################################################
 The tookit used for running strategies can be found here:
 https://github.com/systematicinvestor/SIT
+
 Many thanks to Michael Kapler.
+
+
+Note to myself: I need to learn how to use markdown tags.
