@@ -262,7 +262,14 @@ class Population(object):
             print '==============================='
 
         # Create random individuals according to imigration rate
-        idx = int(round(self._size * self._imigration))
+        ## If the convergence ratio is reached, then imigration rate is 50%
+        ## '--> (best - worst)/worst
+        ratio = (self._fitness[0] - self._fitness[-1]) / self._fitness[-1]
+        if ratio <= 0.08:
+            imig_rate = 0.5
+        else:
+            imig_rate = self._imigration
+        idx = int(round(self._size * imig_rate))
         for i in range(idx):
             buf.append(Chromosome(Rule.gen_random()))
         buff.extend([0.0] * idx)
