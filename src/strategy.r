@@ -10,13 +10,18 @@ source('SIT.r')
 #parsing dates helper function
 fun <- function(d) as.chron(strptime(d, "%d.%m.%Y %H:%M:%S"))#parsing dates helper function
 
-read_data <- function(tickers, file.path) {
+read_data <- function(file.path, dates) {
 	quotes <- new.env()
-	for(n in tickers) { 
+	for(file in file.path) { 
+		n <- pair_name_from_path(file)
 		quotes[[n]] =   as.xts(read.zoo(
-			file=paste(file.path, n, '.csv', sep=''),
+			#file=paste(file.path, n, '.csv', sep=''),
+			file=file,
 			header=F, FUN=fun,sep=',',
 			col.names=c("GMT time", "Open","High","Low","Close","Volume")))
+		if(dates != '') {
+			quotes[[n]] = quotes[[n]][dates]
+		}
 		# fill missing values
 		quotes[[n]] = na.locf(quotes[[n]], fromLast=TRUE) 
 		quotes[[n]] <- quotes[[n]][quotes[[n]]$Volume != 0]
@@ -25,6 +30,11 @@ read_data <- function(tickers, file.path) {
 	bt.prep(quotes, align='remove.na')
 
 	return(quotes)
+}
+
+pair_name_from_path <- function(filepath) {
+	fp <- strsplit(filepath, '/')[[1]]
+	return(strsplit(tail(fp,1), '.csv')[[1]])
 }
 
 evaluate_rule <- function(prices, rule) {

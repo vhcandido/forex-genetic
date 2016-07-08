@@ -1,11 +1,14 @@
 source('strategy.r')
 
 # Read currency pairs from stdin
-tickers <- commandArgs(trailingOnly = TRUE)
-file.path<- '../data/'
+param <- commandArgs(trailingOnly = TRUE)
+# Get all elements but the last
+file.path <- head(param, -1)
+# Last element
+dates <- tail(param, 1)
 
 #Load financial data
-quotes <- read_data(tickers, file.path)
+quotes <- read_data(file.path, dates)
 prices <- quotes$prices
 
 while(TRUE) {
