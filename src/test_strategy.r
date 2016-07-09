@@ -10,9 +10,7 @@ buy <- params[1:9]
 sell <- params[10:18]
 
 # Load financial data
-tickers <- c('GBPUSD')
-file.path<- '../data/'
-quotes <- read_data(tickers, file.path)
+quotes <- read_data('../data/GBPUSD.csv', '')
 prices <- quotes$prices
 
 # Evaluate the output of the rules
@@ -23,9 +21,12 @@ models <- run_strategy(quotes, rule)
 
 # Simple output - may be removed later
 sharpe <- compute.sharpe(models$stopped.rule$ret)
-print(sharpe)
+calmar <- compute.calmar(models$stopped.rule$equity)
+cat('Sharpe: ', sharpe)
+cat('Calmar: ', calmar)
 
-effective_dates = '2015-01-01::2015-09-30'
+#effective_dates = '2015-01-01::2015-09-30'
+effective_dates = ''
 # Get graphic information of the strategy
-bt.stop.strategy.plot(quotes, models$stop.loss.take.profit, dates = effective_dates, layout=F, main = 'Strategy', plotX = T)
+bt.stop.strategy.plot(quotes, models$stopped.rule, dates = effective_dates, layout=F, main = 'Strategy', plotX = T)
 strategy.performance.snapshoot(models, T) 
