@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 import socket
-import pdb
+#import pdb
 
 import matplotlib.pyplot as plt
 
@@ -188,13 +188,14 @@ class Chromosome(Rule):
 
 class Population(object):
     def __init__(self, size=1500, crossover=0.6, elitism=0.01, mutation=0.01,
-            imigration=0.3, tournament_size=50, debug=False):
+            imigration=0.3, tournament_size=50, port=6000, debug=False):
         self._size = size
         self._crossover = crossover
         self._elitism = elitism
         self._mutation = mutation
         self._imigration = imigration
         self._tournament_size = tournament_size
+        self._port = port
         self._debug = debug
         self.improved = False
 
@@ -219,7 +220,7 @@ class Population(object):
 
     def evaluate(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("localhost", 6011))
+        s.connect(("localhost", self._port))
 
         buf = list()
         prev_best = self._fitness[0]

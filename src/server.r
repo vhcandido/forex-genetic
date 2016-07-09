@@ -2,10 +2,20 @@ source('strategy.r')
 
 # Read currency pairs from stdin
 param <- commandArgs(trailingOnly = TRUE)
+
 # Get all elements but the last
-file.path <- head(param, -1)
+#file.path <- head(param, -1)
+file.path <- param[1]
+
+#Port number
+port <- tail(param, 1)
+
 # Last element
-dates <- tail(param, 1)
+if(len(param) > 2) {
+	dates <- param[2]
+} else {
+	dates <- ''
+}
 
 #Load financial data
 quotes <- read_data(file.path, dates)
@@ -13,7 +23,7 @@ prices <- quotes$prices
 
 while(TRUE) {
 	# Open socket connection
-	con <- socketConnection(host="localhost", port = 6011, blocking=TRUE,
+	con <- socketConnection(host="localhost", port = port, blocking=TRUE,
 		    server=TRUE, open="r+")
 	while(TRUE) {
 		# Wait to receive the next rule

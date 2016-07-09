@@ -9,10 +9,11 @@
 # +===========================================================================+
 
 from genetic import Population
+import sys
 
-def main():
-    max_generations = 100
-    max_not_improved = 10
+def main(port):
+    max_generations = 200
+    max_not_improved = 20
 
     # Creating initial population
     pop = Population( size = 100,
@@ -21,6 +22,7 @@ def main():
             elitism = 0.05,
             imigration = 0.3,
             tournament_size = 10,
+            port = int(port),
             debug = False)
 
     # Generations without improvements
@@ -52,7 +54,11 @@ def main():
     pop.show_first()
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        print("\nInput file was expected.\nExiting...\n")
+        exit(1)
 
 
 

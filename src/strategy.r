@@ -10,7 +10,7 @@ source('SIT.r')
 #parsing dates helper function
 fun <- function(d) as.chron(strptime(d, "%d.%m.%Y %H:%M:%S"))#parsing dates helper function
 
-read_data <- function(file.path, dates) {
+read_data <- function(file.path, dates='') {
 	quotes <- new.env()
 	for(file in file.path) { 
 		n <- pair_name_from_path(file)
@@ -108,8 +108,8 @@ stop.loss.take.profit <- function(weight, price, tstart, tend, pstop, pprofit) {
 
 run_strategy <- function(quotes, rule) {
 	# TP and SL levels its R:R is 2:10!
-	Takeprofit = 10/100
-	Stoploss = 2/100
+	Takeprofit = 3/100
+	Stoploss = 1/100
 
 	models <- list()
 
